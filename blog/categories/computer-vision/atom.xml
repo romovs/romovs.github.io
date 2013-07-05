@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Computer Vision | Sneaky Electrons]]></title>
+  <link href="http://romovs.github.io/blog/categories/computer-vision/atom.xml" rel="self"/>
+  <link href="http://romovs.github.io/"/>
+  <updated>2013-07-05T17:41:16+03:00</updated>
+  <id>http://romovs.github.io/</id>
+  <author>
+    <name><![CDATA[Roman Ovseitsev]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Matching image to a collection of images with Emgu CV]]></title>
+    <link href="http://romovs.github.io/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv/"/>
+    <updated>2013-07-05T15:15:00+03:00</updated>
+    <id>http://romovs.github.io/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv</id>
+    <content type="html"><![CDATA[<p>One way  for finding matching image within a collection of images (let&rsquo;s say using SURF algorithm) is to extract features from the query image and all the images in the collection, and then find matching features one by one.
+While this might work for small collections, it will have horrible performance for collections of considerable size. <br/>
+For a better performing approach we can use Fast Approximate Nearest Neighbor (FLANN) search which was created for the purpose of doing fast nearest neighbor search in large data-sets.<br/>
+So let&rsquo;s get straight to it.</p>
+
+<p><strong> Implementation Concept </strong></p>
+
+<ol>
+<li><p>For each image in the collection compute descriptors with the algorithm best fitting your requirements.
+I am using SURF, however depending on the required license, performance or image nuances a different algorithm might be more appropriate.</p></li>
+<li><p>Combine all the descriptors into one big matrix while keeping track which descriptor range within the matrix came from what image.
+Basically we concatenate rows from all matrices and save the row number where the newly appended descriptors start and end.</p></li>
+<li><p>Build a FLANN index from the concatenated matrix.</p></li>
+<li><p>Compute descriptors for the query image.</p></li>
+<li><p>Run KNN search over the FLANN index. A K-Nearest-Neighbours search computes the distance between a query descriptor and all of the image collection descriptors, and returns the K pairs with lowest distance. KNN search will produce two matrices &ndash; Indeces matrix and Distances matrix containing indices of descriptors within the concatenated matrix which had the lowest distance and the distances themselves, respectively.</p></li>
+<li><p>Filter out all the inadequate matches computed in the previous step.</p></li>
+<li><p>Now we can find images matching the query image. Since we know which descriptors within the concatenated matrix belong to what
+image, the best matching image will be one that has the higher number of descriptors, or more precisely descriptor indexes in the Indices matrix.</p></li>
+</ol>
+
+
+<p><strong> Implementation </strong>
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="c1">/// &lt;summary&gt;</span>
+</span><span class='line'><span class="c1">/// Main method.</span>
+</span><span class='line'><span class="c1">/// &lt;/summary&gt;</span>
+</span><span class='line'><span class="k">public</span> <span class="n">IList</span><span class="p">&lt;</span><span class="n">IndecesMapping</span><span class="p">&gt;</span> <span class="n">Match</span><span class="p">()</span>
+</span><span class='line'><span class="p">{&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">pre</span><span class="p">&gt;&lt;</span><span class="n">code</span><span class="p">&gt;</span><span class="kt">string</span><span class="p">[]</span> <span class="n">dbImages</span> <span class="p">=</span> <span class="p">{</span><span class="s">&quot;1.jpg&quot;</span><span class="p">,</span> <span class="s">&quot;2.jpg&quot;</span><span class="p">,</span> <span class="s">&quot;3.jpg&quot;</span><span class="p">};</span>
+</span><span class='line'><span class="kt">string</span> <span class="n">queryImage</span> <span class="p">=</span> <span class="s">&quot;query.jpg&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">IList</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">IndecesMapping</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">imap</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// compute descriptors for each image</span>
+</span><span class='line'><span class="kt">var</span> <span class="n">dbDescsList</span> <span class="p">=</span> <span class="n">ComputeMultipleDescriptors</span><span class="p">(</span><span class="n">dbImages</span><span class="p">,</span> <span class="k">out</span> <span class="n">imap</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// concatenate all DB images descriptors into single Matrix</span>
+</span><span class='line'><span class="n">Matrix</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">float</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">dbDescs</span> <span class="p">=</span> <span class="n">ConcatDescriptors</span><span class="p">(</span><span class="n">dbDescsList</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// compute descriptors for the query image</span>
+</span><span class='line'><span class="n">Matrix</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">float</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">queryDescriptors</span> <span class="p">=</span> <span class="n">ComputeSingleDescriptors</span><span class="p">(</span><span class="n">queryImage</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">FindMatches</span><span class="p">(</span><span class="n">dbDescs</span><span class="p">,</span> <span class="n">queryDescriptors</span><span class="p">,</span> <span class="k">ref</span> <span class="n">imap</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">return</span> <span class="n">imap</span><span class="p">;</span>
+</span><span class='line'><span class="p">&lt;/</span><span class="n">code</span><span class="p">&gt;&lt;/</span><span class="n">pre</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="c1">/// &lt;summary&gt;</span>
+</span><span class='line'><span class="c1">/// Computes image descriptors.</span>
+</span><span class='line'><span class="c1">/// &lt;/summary&gt;</span>
+</span><span class='line'><span class="c1">/// &lt;param name=&quot;fileName&quot;&gt;Image filename.&lt;/param&gt;</span>
+</span><span class='line'><span class="c1">/// &lt;returns&gt;The descriptors for the given image.&lt;/returns&gt;</span>
+</span><span class='line'><span class="k">public</span> <span class="n">Matrix</span><span class="p">&lt;</span><span class="kt">float</span><span class="p">&gt;</span> <span class="n">ComputeSingleDescriptors</span><span class="p">(</span><span class="kt">string</span> <span class="n">fileName</span><span class="p">)</span>
+</span><span class='line'><span class="p">{&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">pre</span><span class="p">&gt;&lt;</span><span class="n">code</span><span class="p">&gt;</span><span class="n">Matrix</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">float</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">descs</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="p">(</span><span class="n">Image</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">Gray</span><span class="p">,</span> <span class="n">Byte</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">img</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Image</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">Gray</span><span class="p">,</span> <span class="kt">byte</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;(</span><span class="n">fileName</span><span class="p">))</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">VectorOfKeyPoint</span> <span class="n">keyPoints</span> <span class="p">=</span> <span class="n">detector</span><span class="p">.</span><span class="n">DetectKeyPointsRaw</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">descs</span> <span class="p">=</span> <span class="n">detector</span><span class="p">.</span><span class="n">ComputeDescriptorsRaw</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="k">null</span><span class="p">,</span> <span class="n">keyPoints</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">return</span> <span class="n">descs</span><span class="p">;</span>
+</span><span class='line'><span class="p">&lt;/</span><span class="n">code</span><span class="p">&gt;&lt;/</span><span class="n">pre</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="c1">/// &lt;summary&gt;</span>
+</span><span class='line'><span class="c1">/// Convenience method for computing descriptors for multiple images.</span>
+</span><span class='line'><span class="c1">/// On return imap is filled with structures specifying which descriptor ranges in the concatenated matrix belong to what image.</span>
+</span><span class='line'><span class="c1">/// &lt;/summary&gt;</span>
+</span><span class='line'><span class="c1">/// &lt;param name=&quot;fileNames&quot;&gt;Filenames of images to process.&lt;/param&gt;</span>
+</span><span class='line'><span class="c1">/// &lt;param name=&quot;imap&quot;&gt;List of IndecesMapping to hold descriptor ranges for each image.&lt;/param&gt;</span>
+</span><span class='line'><span class="c1">/// &lt;returns&gt;List of descriptors for the given images.&lt;/returns&gt;</span>
+</span><span class='line'><span class="k">public</span> <span class="n">IList</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">Matrix</span><span class="p">&lt;</span><span class="kt">float</span><span class="p">&gt;&gt;</span> <span class="n">ComputeMultipleDescriptors</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">fileNames</span><span class="p">,</span> <span class="k">out</span> <span class="n">IList</span><span class="p">&lt;</span><span class="n">IndecesMapping</span><span class="p">&gt;</span> <span class="n">imap</span><span class="p">)</span>
+</span><span class='line'><span class="p">{&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">pre</span><span class="p">&gt;&lt;</span><span class="n">code</span><span class="p">&gt;</span><span class="n">imap</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">IndecesMapping</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;();</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">IList</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">Matrix</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">float</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">descs</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">Matrix</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">float</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;&amp;</span><span class="n">gt</span><span class="p">;();</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">r</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">fileNames</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">desc</span> <span class="p">=</span> <span class="n">ComputeSingleDescriptors</span><span class="p">(</span><span class="n">fileNames</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span><span class='line'>    <span class="n">descs</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">desc</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">imap</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="k">new</span> <span class="n">IndecesMapping</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="n">fileName</span> <span class="p">=</span> <span class="n">fileNames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+</span><span class='line'>        <span class="n">IndexStart</span> <span class="p">=</span> <span class="n">r</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">IndexEnd</span> <span class="p">=</span> <span class="n">r</span> <span class="p">+</span> <span class="n">desc</span><span class="p">.</span><span class="n">Rows</span> <span class="p">-</span> <span class="m">1</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">r</span> <span class="p">+=</span> <span class="n">desc</span><span class="p">.</span><span class="n">Rows</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">return</span> <span class="n">descs</span><span class="p">;</span>
+</span><span class='line'><span class="p">&lt;/</span><span class="n">code</span><span class="p">&gt;&lt;/</span><span class="n">pre</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="c1">/// &lt;summary&gt;</span>
+</span><span class='line'><span class="c1">/// Computes &amp;lsquo;similarity&amp;rsquo; value (IndecesMapping.Similarity) for each image in the collection against our query image.</span>
+</span><span class='line'><span class="c1">/// &lt;/summary&gt;</span>
+</span><span class='line'><span class="c1">/// &lt;param name=&quot;dbDescriptors&quot;&gt;Query image descriptor.&lt;/param&gt;</span>
+</span><span class='line'><span class="c1">/// &lt;param name=&quot;queryDescriptors&quot;&gt;Consolidated db images descriptors.&lt;/param&gt;</span>
+</span><span class='line'><span class="c1">/// &lt;param name=&quot;images&quot;&gt;List of IndecesMapping to hold the &amp;lsquo;similarity&amp;rsquo; value for each image in the collection.&lt;/param&gt;</span>
+</span><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">FindMatches</span><span class="p">(</span><span class="n">Matrix</span><span class="p">&lt;</span><span class="kt">float</span><span class="p">&gt;</span> <span class="n">dbDescriptors</span><span class="p">,</span> <span class="n">Matrix</span><span class="p">&lt;</span><span class="kt">float</span><span class="p">&gt;</span> <span class="n">queryDescriptors</span><span class="p">,</span> <span class="k">ref</span> <span class="n">IList</span><span class="p">&lt;</span><span class="n">IndecesMapping</span><span class="p">&gt;</span> <span class="n">imap</span><span class="p">)</span>
+</span><span class='line'><span class="p">{&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">pre</span><span class="p">&gt;&lt;</span><span class="n">code</span><span class="p">&gt;</span><span class="kt">var</span> <span class="n">indices</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Matrix</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">int</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;(</span><span class="n">queryDescriptors</span><span class="p">.</span><span class="n">Rows</span><span class="p">,</span> <span class="m">2</span><span class="p">);</span> <span class="c1">// matrix that will contain indices of the 2-nearest neighbors found</span>
+</span><span class='line'><span class="kt">var</span> <span class="n">dists</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Matrix</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">float</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;(</span><span class="n">queryDescriptors</span><span class="p">.</span><span class="n">Rows</span><span class="p">,</span> <span class="m">2</span><span class="p">);</span> <span class="c1">// matrix that will contain distances to the 2-nearest neighbors found</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// create FLANN index with 4 kd-trees and perform KNN search over it look for 2 nearest neighbours</span>
+</span><span class='line'><span class="kt">var</span> <span class="n">flannIndex</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Index</span><span class="p">(</span><span class="n">dbDescriptors</span><span class="p">,</span> <span class="m">4</span><span class="p">);</span>
+</span><span class='line'><span class="n">flannIndex</span><span class="p">.</span><span class="n">KnnSearch</span><span class="p">(</span><span class="n">queryDescriptors</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">dists</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">24</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">indices</span><span class="p">.</span><span class="n">Rows</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">// filter out all inadequate pairs based on distance between pairs</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">dists</span><span class="p">.</span><span class="n">Data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="m">0</span><span class="p">]</span> <span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="p">(</span><span class="m">0.6</span> <span class="p">*</span> <span class="n">dists</span><span class="p">.</span><span class="n">Data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="m">1</span><span class="p">]))</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// find image from the db to which current descriptor range belongs and increment similarity value.</span>
+</span><span class='line'>        <span class="c1">// in the actual implementation this should be done differently as it&#39;s not very efficient for large image collections.</span>
+</span><span class='line'>        <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">img</span> <span class="k">in</span> <span class="n">imap</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">img</span><span class="p">.</span><span class="n">IndexStart</span> <span class="p">&amp;</span><span class="n">lt</span><span class="p">;=</span> <span class="n">i</span> <span class="p">&amp;</span><span class="n">amp</span><span class="p">;&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">img</span><span class="p">.</span><span class="n">IndexEnd</span> <span class="p">&amp;</span><span class="n">gt</span><span class="p">;=</span> <span class="n">i</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">img</span><span class="p">.</span><span class="n">Similarity</span><span class="p">++;</span>
+</span><span class='line'>                <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="p">&lt;/</span><span class="n">code</span><span class="p">&gt;&lt;/</span><span class="n">pre</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="c1">/// &lt;summary&gt;</span>
+</span><span class='line'><span class="c1">/// Concatenates descriptors from different sources (images) into single matrix.</span>
+</span><span class='line'><span class="c1">/// &lt;/summary&gt;</span>
+</span><span class='line'><span class="c1">/// &lt;param name=&quot;descriptors&quot;&gt;Descriptors to concatenate.&lt;/param&gt;</span>
+</span><span class='line'><span class="c1">/// &lt;returns&gt;Concatenated matrix.&lt;/returns&gt;</span>
+</span><span class='line'><span class="k">public</span> <span class="n">Matrix</span><span class="p">&lt;</span><span class="kt">float</span><span class="p">&gt;</span> <span class="n">ConcatDescriptors</span><span class="p">(</span><span class="n">IList</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">Matrix</span><span class="p">&lt;</span><span class="kt">float</span><span class="p">&gt;&gt;</span> <span class="n">descriptors</span><span class="p">)</span>
+</span><span class='line'><span class="p">{&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">pre</span><span class="p">&gt;&lt;</span><span class="n">code</span><span class="p">&gt;</span><span class="kt">int</span> <span class="n">cols</span> <span class="p">=</span> <span class="n">descriptors</span><span class="p">[</span><span class="m">0</span><span class="p">].</span><span class="n">Cols</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">rows</span> <span class="p">=</span> <span class="n">descriptors</span><span class="p">.</span><span class="n">Sum</span><span class="p">(</span><span class="n">a</span> <span class="p">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">a</span><span class="p">.</span><span class="n">Rows</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">float</span><span class="p">[,]</span> <span class="n">concatedDescs</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">float</span><span class="p">[</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">offset</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">descriptor</span> <span class="k">in</span> <span class="n">descriptors</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">// append new descriptors</span>
+</span><span class='line'>    <span class="n">Buffer</span><span class="p">.</span><span class="n">BlockCopy</span><span class="p">(</span><span class="n">descriptor</span><span class="p">.</span><span class="n">ManagedArray</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="n">concatedDescs</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">)</span> <span class="p">*</span> <span class="n">descriptor</span><span class="p">.</span><span class="n">ManagedArray</span><span class="p">.</span><span class="n">Length</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">offset</span> <span class="p">+=</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">)</span> <span class="p">*</span> <span class="n">descriptor</span><span class="p">.</span><span class="n">ManagedArray</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">return</span> <span class="k">new</span> <span class="n">Matrix</span><span class="p">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">float</span><span class="p">&amp;</span><span class="n">gt</span><span class="p">;(</span><span class="n">concatedDescs</span><span class="p">);</span>
+</span><span class='line'><span class="p">&lt;/</span><span class="n">code</span><span class="p">&gt;&lt;/</span><span class="n">pre</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">IndecesMapping</span>
+</span><span class='line'><span class="p">{&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">pre</span><span class="p">&gt;&lt;</span><span class="n">code</span><span class="p">&gt;</span><span class="k">public</span> <span class="kt">int</span> <span class="n">IndexStart</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="k">public</span> <span class="kt">int</span> <span class="n">IndexEnd</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="k">public</span> <span class="kt">int</span> <span class="n">Similarity</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="k">public</span> <span class="kt">string</span> <span class="n">fileName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="p">&lt;/</span><span class="n">code</span><span class="p">&gt;&lt;/</span><span class="n">pre</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">private</span> <span class="k">const</span> <span class="kt">double</span> <span class="n">surfHessianThresh</span> <span class="p">=</span> <span class="m">300</span><span class="p">;</span>
+</span><span class='line'><span class="k">private</span> <span class="k">const</span> <span class="kt">bool</span> <span class="n">surfExtendedFlag</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+</span><span class='line'><span class="k">private</span> <span class="n">SURFDetector</span> <span class="n">detector</span> <span class="p">=</span> <span class="k">new</span> <span class="n">SURFDetector</span><span class="p">(</span><span class="n">surfHessianThresh</span><span class="p">,</span> <span class="n">surfExtendedFlag</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
+  
+</feed>

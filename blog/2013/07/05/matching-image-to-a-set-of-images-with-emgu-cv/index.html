@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Sneaky Electrons</title>
+  <title>Matching image to a collection of images with Emgu CV - Sneaky Electrons</title>
   <meta name="author" content="Roman Ovseitsev">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://romovs.github.io">
+  <link rel="canonical" href="http://romovs.github.io/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Sneaky Electrons" type="application/atom+xml">
@@ -75,15 +75,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv/">Matching Image to a Collection of Images With Emgu CV</a></h1>
+      <h1 class="entry-title">Matching Image to a Collection of Images With Emgu CV</h1>
     
     
       <p class="meta">
@@ -106,7 +103,7 @@
   </header>
 
 
-  <div class="entry-content"><p>One way  for finding matching image within a collection of images (let&rsquo;s say using SURF algorithm) is to extract features from the query image and all the images in the collection, and then find matching features one by one.
+<div class="entry-content"><p>One way  for finding matching image within a collection of images (let&rsquo;s say using SURF algorithm) is to extract features from the query image and all the images in the collection, and then find matching features one by one.
 While this might work for small collections, it will have horrible performance for collections of considerable size. <br/>
 For a better performing approach we can use Fast Approximate Nearest Neighbor (FLANN) search which was created for the purpose of doing fast nearest neighbor search in large data-sets.<br/>
 So let&rsquo;s get straight to it.</p>
@@ -440,22 +437,16 @@ image, the best matching image will be one that has the higher number of descrip
 
 
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/07/04/first-post/">EIA Standard Resistor Value Approximation in JavaScript</a></h1>
-    
-    
-      <p class="meta">
-        
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Roman Ovseitsev</span></span>
+
+      
 
 
 
@@ -467,117 +458,42 @@ image, the best matching image will be one that has the higher number of descrip
   
 
 
-<time datetime="2013-07-04T07:12:00+03:00" pubdate data-updated="true">Jul 4<span>th</span>, 2013</time>
-        
-      </p>
+<time datetime="2013-07-05T15:15:00+03:00" pubdate data-updated="true">Jul 5<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/c-number/'>C#</a>, <a class='category' href='/blog/categories/computer-vision/'>Computer Vision</a>, <a class='category' href='/blog/categories/emgu-cv/'>Emgu CV</a>, <a class='category' href='/blog/categories/image-matching/'>Image Matching</a>
+  
+</span>
+
+
+    </p>
     
-  </header>
+      <div class="sharing">
+  
+  
+  
+</div>
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/07/04/first-post/" title="Previous Post: EIA standard resistor value approximation in JavaScript">&laquo; EIA standard resistor value approximation in JavaScript</a>
+      
+      
+    </p>
+  </footer>
+</article>
 
-  <div class="entry-content"><p>While working on my bi-directional resistor color code calculator, one of the first things I stumbled upon was how to normalize the user supplied resistance value.<br/>
-Generally, resistors come in predefined values, or &ldquo;preferred values&rdquo;. These values were defined by Electronic Industries Association (EIA) (IEC 60038) and consist of about 6 different series with each series corresponding to particular tolerances:</p>
-
-<pre><code>E6    20% tolerance
-E12   10% tolerance
-E24   5% tolerance
-E48   2% tolerance
-E96   1% tolerance
-E192  0.5, 0.25, 0.1% tolerances
-</code></pre>
-
-<p><a href="http://www.vishay.com/docs/31001/dectable.pdf">Full table</a></p>
-
-<p>Such division ensures that substituting an arbitrary value with nearest preferred value wouldn&rsquo;t exceed the required tolerance.
-In other words, given a tolerance and an arbitrary resistance value we can calculate the preferred value using the above table.</p>
-
-<p>Fortunately there is much neater way to do this. It is possible to approximate E-series preferred values (which is basically <a href="http://en.wikipedia.org/wiki/Preferred_number">Renard series</a> with different interval steeping) with the following equation (author unknown):</p>
-
-<p><img class="center" src="/images/eqn.png">
-Where R is the resistance, round() is round to nearest integer function, and round2decimal() is round to 2 decimal places function.<br/>
-The equation seemed to work for E48 and E96 series, but gave wrong values for other.
-The code below is its adaptation for JavaScript and for the rest of the series E12/24/192. The function accepts resistance value in Ohm plus tolerance and produces closest preferred value.</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'>   <span class="kd">function</span> <span class="nx">log10</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="o">/</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">LN10</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="kd">function</span> <span class="nx">EIAValues</span><span class="p">(</span><span class="nx">val</span><span class="p">,</span> <span class="nx">tolerance</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="kd">var</span> <span class="nx">series</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">20</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
-</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">10</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">12</span><span class="p">;</span>
-</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">24</span><span class="p">;</span>
-</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">48</span><span class="p">;</span>
-</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">96</span><span class="p">;</span>
-</span><span class='line'>            <span class="k">else</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">192</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="kd">var</span> <span class="nx">l</span> <span class="o">=</span> <span class="nx">log10</span><span class="p">(</span><span class="nx">val</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="kd">var</span> <span class="nx">decplaces</span> <span class="o">=</span> <span class="nx">series</span> <span class="o">&lt;</span> <span class="mi">48</span> <span class="o">?</span> <span class="mi">10</span> <span class="o">:</span> <span class="mi">100</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="kd">var</span> <span class="nx">pref_val</span> <span class="o">=</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">((</span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">series</span> <span class="o">*</span> <span class="nx">l</span><span class="p">)</span> <span class="o">/</span> <span class="nx">series</span><span class="p">))</span> <span class="o">/</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">log10</span><span class="p">((</span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">series</span> <span class="o">*</span> <span class="nx">l</span><span class="p">)</span> <span class="o">/</span> <span class="nx">series</span><span class="p">)))))))</span> <span class="o">*</span> <span class="nx">decplaces</span><span class="p">)</span> <span class="o">/</span> <span class="nx">decplaces</span><span class="p">)</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">log10</span><span class="p">((</span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">series</span> <span class="o">*</span> <span class="nx">l</span><span class="p">)</span> <span class="o">/</span> <span class="nx">series</span><span class="p">))))));</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="c1">// compensate for possible precision loss in the above calculation</span>
-</span><span class='line'>            <span class="kd">var</span> <span class="nx">rounded</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">pref_val</span><span class="p">);</span>
-</span><span class='line'>            <span class="kd">var</span> <span class="nx">abs</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">rounded</span> <span class="o">-</span> <span class="nx">pref_val</span><span class="p">);</span>
-</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">abs</span> <span class="o">&gt;</span> <span class="mf">0.999</span> <span class="o">||</span> <span class="nx">abs</span> <span class="o">&lt;</span> <span class="mf">0.0001</span><span class="p">)</span>
-</span><span class='line'>                <span class="nx">pref_val</span> <span class="o">=</span> <span class="nx">rounded</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">pref_val</span> <span class="o">&gt;=</span> <span class="mi">260</span> <span class="o">&amp;&amp;</span> <span class="nx">pref_val</span> <span class="o">&lt;=</span> <span class="mi">460</span><span class="p">)</span> <span class="nx">pref_val</span> <span class="o">+=</span> <span class="mi">10</span><span class="p">;</span> <span class="c1">// fix for E24/E12/E6 series   </span>
-</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">pref_val</span> <span class="o">==</span> <span class="mi">830</span><span class="p">)</span> <span class="nx">pref_val</span> <span class="o">-=</span> <span class="mi">10</span><span class="p">;</span>               <span class="c1">// fix for E24/E12/E6 series</span>
-</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">pref_val</span> <span class="o">==</span> <span class="mi">919</span><span class="p">)</span> <span class="nx">pref_val</span><span class="o">++</span><span class="p">;</span>                   <span class="c1">// fix for E192 series</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="k">return</span> <span class="nx">pref_val</span><span class="p">;</span>
-</span><span class='line'>        <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
 
 </div>
-  
-  
 
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
 <aside class="sidebar">
   
     <section>
@@ -598,7 +514,7 @@ The code below is its adaptation for JavaScript and for the rest of the series E
 <section>
   <h1>GitHub Repos</h1>
   <ul id="gh_repos">
-    <li class="loading">Status updating&#8230;</li>
+    <li class="loading">Status updating...</li>
   </ul>
   
   <a href="https://github.com/romovs">@romovs</a> on GitHub
@@ -631,6 +547,7 @@ The code below is its adaptation for JavaScript and for the rest of the series E
   
 </aside>
 
+
     </div>
   </div>
   <footer role="contentinfo"><p>
@@ -645,7 +562,10 @@ The code below is its adaptation for JavaScript and for the rest of the series E
       var disqus_shortname = 'sneakyelectrons';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://romovs.github.io/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv/';
+        var disqus_url = 'http://romovs.github.io/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

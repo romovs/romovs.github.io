@@ -119,9 +119,12 @@ E192  0.5, 0.25, 0.1% tolerances
 <p>Such division ensures that substituting an arbitrary value with nearest preferred value wouldn&rsquo;t exceed the required tolerance.
 In other words, given a tolerance and an arbitrary resistance value we can calculate the preferred value using the above table.</p>
 
-<p>Fortunately there is much neater way to do this &ndash; a formula for approximation of E-series preferred values (which is basically <a href="http://en.wikipedia.org/wiki/Preferred_number">Renard series</a> with different interval steeping).
-The code below is its adaptation for JavaScript. The function accepts resistance value in Ohm with tolerance and produces closest preferred value.
-Resistance is not checked for validity, i.e. exceeding minimum/maximum supported values 0.1R and 990M, so this should be taken care off elsewhere.</p>
+<p>Fortunately there is much neater way to do this. It is possible to approximate E-series preferred values (which is basically <a href="http://en.wikipedia.org/wiki/Preferred_number">Renard series</a> with different interval steeping) with the following equation (author unknown):</p>
+
+<p><img class="center" src="/images/eqn.png">
+Where R is the resistance, round() is round to nearest integer function, and round2decimal() is round to 2 decimal places function.<br/>
+The equation seemed to work for E48 and E96 series, but gave wrong values for other.
+The code below is its adaptation for JavaScript and for the rest of the series E12/24/192. The function accepts resistance value in Ohm plus tolerance and produces closest preferred value.</p>
 
 <figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -150,33 +153,43 @@ Resistance is not checked for validity, i.e. exceeding minimum/maximum supported
 <span class='line-number'>25</span>
 <span class='line-number'>26</span>
 <span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
 </pre></td><td class='code'><pre><code class='js'><span class='line'>   <span class="kd">function</span> <span class="nx">log10</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>      <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="o">/</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">LN10</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="kd">function</span> <span class="nx">EIAValue</span><span class="p">(</span><span class="nx">val</span><span class="p">,</span> <span class="nx">tolerance</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">series</span><span class="p">;</span>
+</span><span class='line'>        <span class="kd">function</span> <span class="nx">EIAValues</span><span class="p">(</span><span class="nx">val</span><span class="p">,</span> <span class="nx">tolerance</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">series</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">20</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
-</span><span class='line'>      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">10</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">12</span><span class="p">;</span>
-</span><span class='line'>      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">24</span><span class="p">;</span>
-</span><span class='line'>      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">48</span><span class="p">;</span>
-</span><span class='line'>      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">96</span><span class="p">;</span>
-</span><span class='line'>      <span class="k">else</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">192</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">20</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">10</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">12</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">24</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">48</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">tolerance</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">96</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">else</span> <span class="nx">series</span> <span class="o">=</span> <span class="mi">192</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">l</span> <span class="o">=</span> <span class="nx">log10</span><span class="p">(</span><span class="nx">val</span><span class="p">);</span>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">l</span> <span class="o">=</span> <span class="nx">log10</span><span class="p">(</span><span class="nx">val</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">pref_val</span> <span class="o">=</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">((</span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">series</span> <span class="o">*</span> <span class="nx">l</span><span class="p">)</span> <span class="o">/</span> <span class="nx">series</span><span class="p">))</span> <span class="o">/</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">log10</span><span class="p">((</span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">series</span> <span class="o">*</span> <span class="nx">l</span><span class="p">)</span> <span class="o">/</span> <span class="nx">series</span><span class="p">)))))))</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">log10</span><span class="p">((</span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">series</span> <span class="o">*</span> <span class="nx">l</span><span class="p">)</span> <span class="o">/</span> <span class="nx">series</span><span class="p">))))));</span>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">decplaces</span> <span class="o">=</span> <span class="nx">series</span> <span class="o">&lt;</span> <span class="mi">48</span> <span class="o">?</span> <span class="mi">10</span> <span class="o">:</span> <span class="mi">100</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'>      <span class="c1">// compensate for possible precision loss in the above calculation</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">rounded</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">pref_val</span><span class="p">);</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">abs</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">rounded</span> <span class="o">-</span> <span class="nx">pref_val</span><span class="p">);</span>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">pref_val</span> <span class="o">=</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">((</span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">series</span> <span class="o">*</span> <span class="nx">l</span><span class="p">)</span> <span class="o">/</span> <span class="nx">series</span><span class="p">))</span> <span class="o">/</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">log10</span><span class="p">((</span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">series</span> <span class="o">*</span> <span class="nx">l</span><span class="p">)</span> <span class="o">/</span> <span class="nx">series</span><span class="p">)))))))</span> <span class="o">*</span> <span class="nx">decplaces</span><span class="p">)</span> <span class="o">/</span> <span class="nx">decplaces</span><span class="p">)</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">log10</span><span class="p">((</span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">series</span> <span class="o">*</span> <span class="nx">l</span><span class="p">)</span> <span class="o">/</span> <span class="nx">series</span><span class="p">))))));</span>
 </span><span class='line'>
-</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="nx">abs</span> <span class="o">&gt;</span> <span class="mf">0.999</span> <span class="o">||</span> <span class="nx">abs</span> <span class="o">&lt;</span> <span class="mf">0.0001</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nx">rounded</span><span class="p">;</span>
+</span><span class='line'>            <span class="c1">// compensate for possible precision loss in the above calculation</span>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">rounded</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">pref_val</span><span class="p">);</span>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">abs</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">rounded</span> <span class="o">-</span> <span class="nx">pref_val</span><span class="p">);</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">abs</span> <span class="o">&gt;</span> <span class="mf">0.999</span> <span class="o">||</span> <span class="nx">abs</span> <span class="o">&lt;</span> <span class="mf">0.0001</span><span class="p">)</span>
+</span><span class='line'>                <span class="nx">pref_val</span> <span class="o">=</span> <span class="nx">rounded</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'>      <span class="k">return</span> <span class="nx">pref_val</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">pref_val</span> <span class="o">&gt;=</span> <span class="mi">260</span> <span class="o">&amp;&amp;</span> <span class="nx">pref_val</span> <span class="o">&lt;=</span> <span class="mi">460</span><span class="p">)</span> <span class="nx">pref_val</span> <span class="o">+=</span> <span class="mi">10</span><span class="p">;</span> <span class="c1">// fix for E24/E12/E6 series   </span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">pref_val</span> <span class="o">==</span> <span class="mi">830</span><span class="p">)</span> <span class="nx">pref_val</span> <span class="o">-=</span> <span class="mi">10</span><span class="p">;</span>               <span class="c1">// fix for E24/E12/E6 series</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">pref_val</span> <span class="o">==</span> <span class="mi">919</span><span class="p">)</span> <span class="nx">pref_val</span><span class="o">++</span><span class="p">;</span>                   <span class="c1">// fix for E192 series</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">return</span> <span class="nx">pref_val</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -225,6 +238,8 @@ Resistance is not checked for validity, i.e. exceeding minimum/maximum supported
     <p class="meta">
       
       
+        <a class="basic-alignment right" href="/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv/" title="Next Post: Matching image to a collection of images with Emgu CV">Matching image to a collection of images with Emgu CV &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -242,6 +257,10 @@ Resistance is not checked for validity, i.e. exceeding minimum/maximum supported
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv/">Matching Image to a Collection of Images With Emgu CV</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/07/04/first-post/">EIA Standard Resistor Value Approximation in JavaScript</a>
