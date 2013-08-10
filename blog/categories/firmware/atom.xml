@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Firmware | Sneaky Electrons]]></title>
+  <link href="http://romovs.github.io/blog/categories/firmware/atom.xml" rel="self"/>
+  <link href="http://romovs.github.io/"/>
+  <updated>2013-08-10T16:41:02+03:00</updated>
+  <id>http://romovs.github.io/</id>
+  <author>
+    <name><![CDATA[Roman Ovseitsev]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[iriver E30/E50 recovery]]></title>
+    <link href="http://romovs.github.io/blog/2013/08/10/iriver-e30-slash-e50-recovery/"/>
+    <updated>2013-08-10T16:05:00+03:00</updated>
+    <id>http://romovs.github.io/blog/2013/08/10/iriver-e30-slash-e50-recovery</id>
+    <content type="html"><![CDATA[<p>Yesterday my rather old, but still totally awesome, iriver E30 stopped working &ndash; it would just display &ldquo;designed by iriver&rdquo; briefly before shutting down completely.
+Actually, it started behaving erratically a few month before. Occasionally it would un-mount or wouldn&rsquo;t connect at all. I just blamed it on the OS at the time, but
+as it turns out, it&rsquo;s rather a common problem with iriver players and can be fixed by re-flashing the firmware in recovery mode.</p>
+
+<p>If you have Windows XP laying around then just download firmware package for <a href="http://www.iriverinc.com/download/downloadView.asp?selectPart=cateCode&amp;findWord=02&amp;sno=1060&amp;page=1&amp;cateCode=02">E30</a> and follow the steps bellow.
+On Windows 7 the updater bundled with E30 wouldn&rsquo;t work, but the one from <a href="http://www.iriverinc.com/download/downloadView.asp?selectPart=02&amp;findWord=&amp;sno=1021&amp;page=1&amp;cateCode=02">E40</a> firmware package can be used instead. Just overwrite updater.sb and E40.Hex in the E40 firmware package with updater.sb and E30.Hex from E30 package.</p>
+
+<p>By the way, an actual Windows machine might be needed for this, it didn&rsquo;t work for me with VirtualBox under Linux.</p>
+
+<ol>
+<li>Take the player apart. There are four screws on the bottom holding the circuit board down and two under the LCD. You&rsquo;ll need to lift the LCD to remove those.<img class="center" src="/images/p8101612.jpg"></li>
+<li>Desolder the battery. Speaking of which, this could be a good opportunity to replace it with a newer one. I was unable to find a replacement with exactly the same dimensions: 2.8mm thick x 30mm wide x 48mm long (hence the model number PR-283048N), but slightly thicker 303048 worked just as fine.</li>
+<li>Short out bottom right 5th and 6th pin (see the picture) of the flash memory chip. Just use something conductive, it doesn&rsquo;t need to permanent.<img class="center" src="/images/p8101610.jpg"></li>
+<li>Connect the player to computer.</li>
+<li>Wait for Windows to install drivers for the newly found devices (should display as HID-compatibale and USB input devices under system manager).</li>
+<li>Remove the short-out and run StUpdaterApp_E40.exe.<img class="center" src="/images/updater.png"></li>
+<li>Click Start and wait for it to finish.</li>
+<li>Repeat steps 3-7 if something goes wrong&hellip;</li>
+</ol>
+
+]]></content>
+  </entry>
+  
+</feed>

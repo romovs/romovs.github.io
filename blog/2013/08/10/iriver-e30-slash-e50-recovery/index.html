@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: C# - Sneaky Electrons</title>
+  <title>iriver E30/E50 recovery - Sneaky Electrons</title>
   <meta name="author" content="Roman Ovseitsev">
 
   
-  <meta name="description" content="Category: C#">
+  <meta name="description" content="Yesterday my rather old, but still totally awesome, iriver E30 stopped working &ndash; it would just display &ldquo;designed by iriver&rdquo; briefly &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://romovs.github.ioblog/categories/c-number">
+  <link rel="canonical" href="http://romovs.github.io/blog/2013/08/10/iriver-e30-slash-e50-recovery">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Sneaky Electrons" type="application/atom+xml">
@@ -76,36 +76,108 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: C#</h1>
+    
+      <h1 class="entry-title">Iriver E30/E50 Recovery</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-10T16:05:00+03:00" pubdate data-updated="true">Aug 10<span>th</span>, 2013</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
 
 
+<div class="entry-content"><p>Yesterday my rather old, but still totally awesome, iriver E30 stopped working &ndash; it would just display &ldquo;designed by iriver&rdquo; briefly before shutting down completely.
+Actually, it started behaving erratically a few month before. Occasionally it would un-mount or wouldn&rsquo;t connect at all. I just blamed it on the OS at the time, but
+as it turns out, it&rsquo;s rather a common problem with iriver players and can be fixed by re-flashing the firmware in recovery mode.</p>
 
-  
-  <h2>2013</h2>
+<p>If you have Windows XP laying around then just download firmware package for <a href="http://www.iriverinc.com/download/downloadView.asp?selectPart=cateCode&amp;findWord=02&amp;sno=1060&amp;page=1&amp;cateCode=02">E30</a> and follow the steps bellow.
+On Windows 7 the updater bundled with E30 wouldn&rsquo;t work, but the one from <a href="http://www.iriverinc.com/download/downloadView.asp?selectPart=02&amp;findWord=&amp;sno=1021&amp;page=1&amp;cateCode=02">E40</a> firmware package can be used instead. Just overwrite updater.sb and E40.Hex in the E40 firmware package with updater.sb and E30.Hex from E30 package.</p>
 
-<article>
-  
-<h1><a href="/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv/">Matching image to a collection of images with Emgu CV</a></h1>
-<time datetime="2013-07-05T15:15:00+03:00" pubdate><span class='month'>Jul</span> <span class='day'>05</span> <span class='year'>2013</span></time>
+<p>By the way, an actual Windows machine might be needed for this, it didn&rsquo;t work for me with VirtualBox under Linux.</p>
 
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/c-number/'>C#</a>, <a class='category' href='/blog/categories/computer-vision/'>Computer Vision</a>, <a class='category' href='/blog/categories/emgu-cv/'>Emgu CV</a>, <a class='category' href='/blog/categories/image-matching/'>Image Matching</a></span>
-</footer>
-
-
-</article>
+<ol>
+<li>Take the player apart. There are four screws on the bottom holding the circuit board down and two under the LCD. You&rsquo;ll need to lift the LCD to remove those.<img class="center" src="/images/p8101612.jpg"></li>
+<li>Desolder the battery. Speaking of which, this could be a good opportunity to replace it with a newer one. I was unable to find a replacement with exactly the same dimensions: 2.8mm thick x 30mm wide x 48mm long (hence the model number PR-283048N), but slightly thicker 303048 worked just as fine.</li>
+<li>Short out bottom right 5th and 6th pin (see the picture) of the flash memory chip. Just use something conductive, it doesn&rsquo;t need to permanent.<img class="center" src="/images/p8101610.jpg"></li>
+<li>Connect the player to computer.</li>
+<li>Wait for Windows to install drivers for the newly found devices (should display as HID-compatibale and USB input devices under system manager).</li>
+<li>Remove the short-out and run StUpdaterApp_E40.exe.<img class="center" src="/images/updater.png"></li>
+<li>Click Start and wait for it to finish.</li>
+<li>Repeat steps 3-7 if something goes wrong&hellip;</li>
+</ol>
 
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Roman Ovseitsev</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-10T16:05:00+03:00" pubdate data-updated="true">Aug 10<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/firmware/'>Firmware</a>, <a class='category' href='/blog/categories/hardware/'>Hardware</a>, <a class='category' href='/blog/categories/recovery/'>Recovery</a>, <a class='category' href='/blog/categories/iriver/'>iriver</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv/" title="Previous Post: Matching image to a collection of images with Emgu CV">&laquo; Matching image to a collection of images with Emgu CV</a>
+      
+      
+    </p>
+  </footer>
 </article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
 
 </div>
 
@@ -181,7 +253,10 @@
       var disqus_shortname = 'sneakyelectrons';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://romovs.github.io/blog/2013/08/10/iriver-e30-slash-e50-recovery/';
+        var disqus_url = 'http://romovs.github.io/blog/2013/08/10/iriver-e30-slash-e50-recovery/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
