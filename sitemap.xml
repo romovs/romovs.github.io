@@ -2,17 +2,23 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://romovs.github.io/blog/2013/07/04/first-post/</loc>
-        <lastmod>2013-07-05T13:38:57+03:00</lastmod>
+        <lastmod>2013-08-23T13:28:36+03:00</lastmod>
     </url>
     <url>
         <loc>
             http://romovs.github.io/blog/2013/07/05/matching-image-to-a-set-of-images-with-emgu-cv/
         </loc>
-        <lastmod>2013-07-05T17:39:40+03:00</lastmod>
+        <lastmod>2013-08-23T13:28:57+03:00</lastmod>
     </url>
     <url>
         <loc>http://romovs.github.io/blog/2013/08/10/iriver-e30-slash-e50-recovery/</loc>
-        <lastmod>2013-08-10T16:40:05+03:00</lastmod>
+        <lastmod>2013-08-23T13:34:15+03:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            http://romovs.github.io/blog/2013/08/23/thinkpad-r61-with-an-external-power-switch/
+        </loc>
+        <lastmod>2013-08-23T18:39:46+03:00</lastmod>
     </url>
     <url>
         <loc>http://romovs.github.io/robots.txt</loc>
@@ -20,10 +26,10 @@
     </url>
     <url>
         <loc>http://romovs.github.io/blog/archives/</loc>
-        <lastmod>2013-08-10T16:40:05+03:00</lastmod>
+        <lastmod>2013-08-23T18:39:46+03:00</lastmod>
     </url>
     <url>
         <loc>http://romovs.github.io/</loc>
-        <lastmod>2013-08-10T16:40:05+03:00</lastmod>
+        <lastmod>2013-08-23T18:39:46+03:00</lastmod>
     </url>
 </urlset>

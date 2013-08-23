@@ -5,11 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: Recovery - Sneaky Electrons</title>
+  <title>ThinkPad R61 with an External Power Switch - Sneaky Electrons</title>
   <meta name="author" content="Roman Ovseitsev">
 
   
-  <meta name="description" content="Category: Recovery">
+  <meta name="description" content="I had an old ThinkPad R61 motherboard lying around which was just begging to be re-purposed as a music system / home automation thingie.
+It&rsquo;s &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://romovs.github.ioblog/categories/recovery">
+  <link rel="canonical" href="http://romovs.github.io/blog/2013/08/23/thinkpad-r61-with-an-external-power-switch">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Sneaky Electrons" type="application/atom+xml">
@@ -50,7 +51,7 @@
   <header role="banner"><hgroup>
   <h1><a href="/">Sneaky Electrons</a></h1>
   
-    <h2>Blog about Software & Hardware.</h2>
+    <h2>Miscellaneous Technical Stuff.</h2>
   
 </hgroup>
 
@@ -76,36 +77,103 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: Recovery</h1>
+    
+      <h1 class="entry-title">ThinkPad R61 With an External Power Switch</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-23T13:26:00+03:00" pubdate data-updated="true">Aug 23<span>rd</span>, 2013</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
 
 
+<div class="entry-content"><p>I had an old ThinkPad R61 motherboard lying around which was just begging to be re-purposed as a music system / home automation thingie.
+It&rsquo;s small enough and plenty powerful for the task. Slap it with a touchscreen, USB DAC, some other peripherals and it would be almost perfect.
+The only drawback is that the power button is located on the keyboard, and basically, there is no way to turn it on without resorting to Wake-on-LAN when keyboard is not attached.<br/>
+At first, I thought it would be easier or at least less destructive just to use a keyboard connector on a piece of breakout board with a power switch attached to it.<br/>
+The connector used on ThinkPad R61 (and on plenty of other models of similar age) is JAE AA01B-P040VA1. However, as it turns out, it&rsquo;s nearly impossible to procure this thing. They seem to be <a href="http://forum.thinkpads.com/viewtopic.php?f=29&amp;t=109940">available</a> only in bulk through some Chinese distributors.</p>
 
-  
-  <h2>2013</h2>
+<p>Seems like the only thing left is to solder the button straight to the motherboard.
+This can be done by soldering a push button to 10th top-left pin and to any of ground pads at the keyboard connector:</p>
 
-<article>
-  
-<h1><a href="/blog/2013/08/10/iriver-e30-slash-e50-recovery/">iriver E30/E50 recovery</a></h1>
-<time datetime="2013-08-10T16:05:00+03:00" pubdate><span class='month'>Aug</span> <span class='day'>10</span> <span class='year'>2013</span></time>
+<p><img class="center" src="/images/kb_conn.jpg"></p>
 
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/firmware/'>Firmware</a>, <a class='category' href='/blog/categories/hardware/'>Hardware</a>, <a class='category' href='/blog/categories/recovery/'>Recovery</a>, <a class='category' href='/blog/categories/iriver/'>iriver</a></span>
-</footer>
+<p>However, since  R61 comes with an unpopulated docking station connector which also exposes the power button pad, it&rsquo;s actually easier to use it instead. The pads are covered with solder mask, so it should be removed with sandpaper before soldering.
+Here we would need to connect 2nd bottom-right pad with any of the ground pads:</p>
 
-
-</article>
-
+<p><img class="center" src="/images/dock_conn.jpg"></p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Roman Ovseitsev</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-23T13:26:00+03:00" pubdate data-updated="true">Aug 23<span>rd</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/hardware/'>Hardware</a>, <a class='category' href='/blog/categories/thinkpad/'>ThinkPad</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/08/10/iriver-e30-slash-e50-recovery/" title="Previous Post: Iriver E30/E50 Recovery">&laquo; Iriver E30/E50 Recovery</a>
+      
+      
+    </p>
+  </footer>
 </article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
 
 </div>
 
@@ -114,6 +182,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/08/23/thinkpad-r61-with-an-external-power-switch/">ThinkPad R61 With an External Power Switch</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/08/10/iriver-e30-slash-e50-recovery/">Iriver E30/E50 Recovery</a>
@@ -181,7 +253,10 @@
       var disqus_shortname = 'sneakyelectrons';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://romovs.github.io/blog/2013/08/23/thinkpad-r61-with-an-external-power-switch/';
+        var disqus_url = 'http://romovs.github.io/blog/2013/08/23/thinkpad-r61-with-an-external-power-switch/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

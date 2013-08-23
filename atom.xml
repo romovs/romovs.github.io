@@ -4,7 +4,7 @@
   <title><![CDATA[Sneaky Electrons]]></title>
   <link href="http://romovs.github.io/atom.xml" rel="self"/>
   <link href="http://romovs.github.io/"/>
-  <updated>2013-08-10T16:41:02+03:00</updated>
+  <updated>2013-08-23T18:41:11+03:00</updated>
   <id>http://romovs.github.io/</id>
   <author>
     <name><![CDATA[Roman Ovseitsev]]></name>
@@ -14,7 +14,30 @@
 
   
   <entry>
-    <title type="html"><![CDATA[iriver E30/E50 recovery]]></title>
+    <title type="html"><![CDATA[ThinkPad R61 with an External Power Switch]]></title>
+    <link href="http://romovs.github.io/blog/2013/08/23/thinkpad-r61-with-an-external-power-switch/"/>
+    <updated>2013-08-23T13:26:00+03:00</updated>
+    <id>http://romovs.github.io/blog/2013/08/23/thinkpad-r61-with-an-external-power-switch</id>
+    <content type="html"><![CDATA[<p>I had an old ThinkPad R61 motherboard lying around which was just begging to be re-purposed as a music system / home automation thingie.
+It&rsquo;s small enough and plenty powerful for the task. Slap it with a touchscreen, USB DAC, some other peripherals and it would be almost perfect.
+The only drawback is that the power button is located on the keyboard, and basically, there is no way to turn it on without resorting to Wake-on-LAN when keyboard is not attached.<br/>
+At first, I thought it would be easier or at least less destructive just to use a keyboard connector on a piece of breakout board with a power switch attached to it.<br/>
+The connector used on ThinkPad R61 (and on plenty of other models of similar age) is JAE AA01B-P040VA1. However, as it turns out, it&rsquo;s nearly impossible to procure this thing. They seem to be <a href="http://forum.thinkpads.com/viewtopic.php?f=29&amp;t=109940">available</a> only in bulk through some Chinese distributors.</p>
+
+<p>Seems like the only thing left is to solder the button straight to the motherboard.
+This can be done by soldering a push button to 10th top-left pin and to any of ground pads at the keyboard connector:</p>
+
+<p><img class="center" src="http://romovs.github.io/images/kb_conn.jpg"></p>
+
+<p>However, since  R61 comes with an unpopulated docking station connector which also exposes the power button pad, it&rsquo;s actually easier to use it instead. The pads are covered with solder mask, so it should be removed with sandpaper before soldering.
+Here we would need to connect 2nd bottom-right pad with any of the ground pads:</p>
+
+<p><img class="center" src="http://romovs.github.io/images/dock_conn.jpg"></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Iriver E30/E50 Recovery]]></title>
     <link href="http://romovs.github.io/blog/2013/08/10/iriver-e30-slash-e50-recovery/"/>
     <updated>2013-08-10T16:05:00+03:00</updated>
     <id>http://romovs.github.io/blog/2013/08/10/iriver-e30-slash-e50-recovery</id>
